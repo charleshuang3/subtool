@@ -17,7 +17,7 @@ func main() {
 
 	var inputFile string
 	var deeplKeyFile string
-	var repeatFile string
+	var unwantFile string
 
 	removeDescriptiveCmd := &cobra.Command{
 		Use:   "remove-descriptive-subtitle",
@@ -41,15 +41,13 @@ func main() {
 		},
 	}
 
-	removeUselessCmd := &cobra.Command{
-		Use:   "remove-useless-subtitle",
-		Short: "Remove useless subtitles from a file",
+	removeUnwantCmd := &cobra.Command{
+		Use:   "remove-unwant",
+		Short: "Remove unwant subtitles from a file",
 		Run: func(cmd *cobra.Command, args []string) {
-			err := sub.RemoveUselessSubtitles(inputFile, repeatFile)
+			err := sub.RemoveUnwantSubtitles(inputFile, unwantFile, os.Stdout)
 			if err != nil {
-				fmt.Println("Error removing useless subtitles:", err)
-			} else {
-				fmt.Println("Successfully removed useless subtitles from:", inputFile)
+				log.Fatalln("Error removing unwant subtitles: ", err)
 			}
 		},
 	}
@@ -70,13 +68,13 @@ func main() {
 	rootCmd.PersistentFlags().StringVarP(&inputFile, "input", "i", "", "Input file path")
 	rootCmd.MarkPersistentFlagRequired("input")
 
-	removeUselessCmd.Flags().StringVar(&repeatFile, "rm", "", "Repeat file path")
-	removeUselessCmd.MarkFlagRequired("rm")
+	removeUnwantCmd.Flags().StringVar(&unwantFile, "unwant", "", "File contains unwanted sub")
+	removeUnwantCmd.MarkFlagRequired("unwant")
 
 	translateCmd.Flags().StringVar(&deeplKeyFile, "deepl-key", "", "Deepl key file path")
 	translateCmd.MarkFlagRequired("deepl-key")
 
-	rootCmd.AddCommand(removeDescriptiveCmd, analyzeRepeatCmd, removeUselessCmd, translateCmd)
+	rootCmd.AddCommand(removeDescriptiveCmd, analyzeRepeatCmd, removeUnwantCmd, translateCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

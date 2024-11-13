@@ -1,6 +1,6 @@
 # Subtool
 
-Subtool is a command line utility for editing subtitle files (`.srt` only for now). It provides functionalities to clean up descriptive subtitles, analyze and remove useless subtitles, and translate subtitles (via Deepl API only for now).
+Subtool is a command line utility for editing subtitle files (`.srt` only for now). It provides functionalities to clean up descriptive subtitles, analyze and remove unwant subtitles, and translate subtitles (via Deepl API only for now).
 
 ## Installation
 
@@ -32,12 +32,12 @@ Analyzes subtitle files to identify repeated lines:
 ./subtool analyze-repeat -i <input_file>
 ```
 
-### Remove Useless Subtitles
+### Remove Unwanted Subtitles
 
-Removes subtitles considered useless based on a repeat file:
+Removes subtitles considered unwant based on a file contains unwanted sub, you can use analyze-repeat's output, 1 per line:
 
 ```bash
-./subtool remove-useless-subtitle -i <input_file> --rm <repeat_file>
+./subtool remove-unwant -i <input_file> --unwant <unwant_file>
 ```
 
 ### Translate Subtitles via Deepl
