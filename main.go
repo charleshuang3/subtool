@@ -65,12 +65,16 @@ func main() {
 		},
 	}
 
-	rootCmd.PersistentFlags().StringVarP(&inputFile, "input", "i", "", "Input file path")
-	rootCmd.MarkPersistentFlagRequired("input")
+	removeDescriptiveCmd.Flags().StringVarP(&inputFile, "input", "i", "", "Input file path")
+	removeDescriptiveCmd.MarkFlagRequired("input")
 
+	removeUnwantCmd.Flags().StringVarP(&inputFile, "input", "i", "", "Input file path")
+	removeUnwantCmd.MarkFlagRequired("input")
 	removeUnwantCmd.Flags().StringVar(&unwantFile, "unwant", "", "File contains unwanted sub")
 	removeUnwantCmd.MarkFlagRequired("unwant")
 
+	translateCmd.Flags().StringVarP(&inputFile, "input", "i", "", "Input file path")
+	translateCmd.MarkFlagRequired("input")
 	translateCmd.Flags().StringVar(&deeplKeyFile, "deepl-key", "", "Deepl key file path")
 	translateCmd.MarkFlagRequired("deepl-key")
 
