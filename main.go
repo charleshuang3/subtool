@@ -35,7 +35,7 @@ func main() {
 		Use:   "analyze-repeat",
 		Short: "Analyze repeat of subtitles",
 		Run: func(cmd *cobra.Command, args []string) {
-			err := sub.AnalyzeRepeatSubtitles(inputFile)
+			err := sub.AnalyzeRepeatSubtitles(inputFile, os.Stdout)
 			if err != nil {
 				fmt.Println("Error analyzing subtitle repeats:", err)
 			}

@@ -2,6 +2,7 @@ package sub
 
 import (
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/asticode/go-astisub"
@@ -12,7 +13,7 @@ const (
 )
 
 // AnalyzeRepeatSubtitles analyzes the input file for repeated subtitles.
-func AnalyzeRepeatSubtitles(inputFile string) error {
+func AnalyzeRepeatSubtitles(inputFile string, output io.Writer) error {
 	sub, err := astisub.OpenFile(inputFile)
 	if err != nil {
 		return err
@@ -30,10 +31,9 @@ func AnalyzeRepeatSubtitles(inputFile string) error {
 	}
 
 	// Print the repeated subtitles and their counts
-	fmt.Println("Repeated subtitles:")
 	for subtitle, count := range subtitleCount {
 		if count >= RepeatThreshold {
-			fmt.Printf("%s | %d\n", subtitle, count)
+			fmt.Fprintf(output, "%s | %d\n", subtitle, count)
 		}
 	}
 
