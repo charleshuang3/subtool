@@ -1,48 +1,34 @@
 package sub
 
 import (
-	"bufio"
-	"fmt"
-	"os"
+	"io"
 	"regexp"
-	"strings"
+
+	"github.com/asticode/go-astisub"
+)
+
+var (
+	// descriptiveRegex matches text within parentheses or square brackets
+	descriptiveRegex = regexp.MustCompile(`\((.*?)\)|\[(.*?)\]`)
 )
 
 // RemoveDescriptiveSubtitles removes descriptive subtitles from the given file.
-func RemoveDescriptiveSubtitles(inputFile string) error {
-	file, err := os.Open(inputFile)
+func RemoveDescriptiveSubtitles(inputFile string, output io.Writer) error {
+	sub, err := astisub.OpenFile(inputFile)
 	if err != nil {
 		return err
 	}
-	defer file.Close()
 
-	var cleanedSubtitles []string
-	scanner := bufio.NewScanner(file)
-	descriptiveRegex := regexp.MustCompile(`\((.*?)\)|\[(.*?)\]`)
+	cleanedSubtitles := []*astisub.Item{}
 
-	for scanner.Scan() {
-		line := scanner.Text()
-		// Remove descriptive parts
-		cleanedLine := descriptiveRegex.ReplaceAllString(line, "")
-		// Trim spaces and append if it's not completely empty
-		if strings.TrimSpace(cleanedLine) != "" {
-			cleanedSubtitles = append(cleanedSubtitles, cleanedLine)
+	for _, item := range sub.Items {
+		subtitleText := multiLinesToOne(item.Lines)
+
+		if !descriptiveRegex.MatchString(subtitleText) {
+			cleanedSubtitles = append(cleanedSubtitles, item)
 		}
 	}
 
-	if err := scanner.Err(); err != nil {
-		return err
-	}
-
-	outputFile, err := os.Create("cleaned_" + inputFile)
-	if err != nil {
-		return err
-	}
-	defer outputFile.Close()
-
-	for _, line := range cleanedSubtitles {
-		fmt.Fprintln(outputFile, line)
-	}
-
-	return nil
+	sub.Items = cleanedSubtitles
+	return sub.WriteToSRT(output)
 }

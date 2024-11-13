@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/charleshuang3/subtool/lib/sub"
@@ -22,11 +23,9 @@ func main() {
 		Use:   "remove-descriptive-subtitle",
 		Short: "Remove descriptive subtitles from a file",
 		Run: func(cmd *cobra.Command, args []string) {
-			err := sub.RemoveDescriptiveSubtitles(inputFile)
+			err := sub.RemoveDescriptiveSubtitles(inputFile, os.Stdout)
 			if err != nil {
-				fmt.Println("Error removing descriptive subtitles:", err)
-			} else {
-				fmt.Println("Successfully cleaned descriptive subtitles from:", inputFile)
+				log.Fatalln("Error removing descriptive subtitles: ", err)
 			}
 		},
 	}
@@ -37,7 +36,7 @@ func main() {
 		Run: func(cmd *cobra.Command, args []string) {
 			err := sub.AnalyzeRepeatSubtitles(inputFile, os.Stdout)
 			if err != nil {
-				fmt.Println("Error analyzing subtitle repeats:", err)
+				log.Fatalln("Error analyzing subtitle repeats:", err)
 			}
 		},
 	}
