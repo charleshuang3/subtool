@@ -29,7 +29,7 @@ func RemoveUnwantSubtitles(inputFile, unwantFile string, output io.Writer) error
 
 	cleanedSubtitles := []*astisub.Item{}
 	for _, item := range sub.Items {
-		subtitleText := multiLinesToOne(item.Lines)
+		subtitleText := joinLinesWithSpace(item.Lines)
 
 		if _, ok := unwantSet[subtitleText]; !ok {
 			cleanedSubtitles = append(cleanedSubtitles, item)

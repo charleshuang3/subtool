@@ -24,7 +24,7 @@ func AnalyzeRepeatSubtitles(inputFile string, output io.Writer) error {
 
 	for _, item := range sub.Items {
 		// Combine the lines into a single string
-		subtitleText := multiLinesToOne(item.Lines)
+		subtitleText := joinLinesWithSpace(item.Lines)
 
 		// Increment the count for this subtitle line
 		subtitleCount[subtitleText]++
@@ -40,13 +40,28 @@ func AnalyzeRepeatSubtitles(inputFile string, output io.Writer) error {
 	return nil
 }
 
-func multiLinesToOne(lines []astisub.Line) string {
+func joinLinesWithSpace(lines []astisub.Line) string {
+	return joinLines(lines, " ", " ")
+}
+
+func joinLines(lines []astisub.Line, lineSpiltter, itemSpiltter string) string {
+	isFirstLine := true
 	sb := strings.Builder{}
 	for _, line := range lines {
+		if isFirstLine {
+			isFirstLine = false
+		} else {
+			sb.WriteString(lineSpiltter)
+		}
+		isFirstItem := true
 		for _, item := range line.Items {
+			if isFirstItem {
+				isFirstItem = false
+			} else {
+				sb.WriteString(itemSpiltter)
+			}
 			sb.WriteString(item.Text)
-			sb.WriteString(" ")
 		}
 	}
-	return strings.TrimSpace(sb.String())
+	return sb.String()
 }

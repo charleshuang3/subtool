@@ -22,7 +22,7 @@ func RemoveDescriptiveSubtitles(inputFile string, output io.Writer) error {
 	cleanedSubtitles := []*astisub.Item{}
 
 	for _, item := range sub.Items {
-		subtitleText := multiLinesToOne(item.Lines)
+		subtitleText := joinLinesWithSpace(item.Lines)
 
 		if !descriptiveRegex.MatchString(subtitleText) {
 			cleanedSubtitles = append(cleanedSubtitles, item)

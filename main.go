@@ -56,11 +56,9 @@ func main() {
 		Use:   "translate",
 		Short: "Translate subtitles using Deepl",
 		Run: func(cmd *cobra.Command, args []string) {
-			err := sub.TranslateSubtitles(inputFile, deeplKeyFile)
+			err := sub.TranslateSubtitles(inputFile, deeplKeyFile, os.Stdout)
 			if err != nil {
-				fmt.Println("Error translating subtitles:", err)
-			} else {
-				fmt.Println("Successfully translated subtitles in:", inputFile)
+				log.Fatalln("Error translating subtitles:", err)
 			}
 		},
 	}

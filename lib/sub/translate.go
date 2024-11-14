@@ -1,118 +1,71 @@
 package sub
 
 import (
-	"bufio"
-	"encoding/json"
-	"errors"
+	"context"
 	"fmt"
-	"io/ioutil"
-	"net/http"
+	"io"
 	"os"
 	"strings"
+
+	"github.com/asticode/go-astisub"
+	"github.com/michimani/deepl-sdk-go"
+	"github.com/michimani/deepl-sdk-go/params"
+	"github.com/michimani/deepl-sdk-go/types"
 )
 
-// DeeplAPIResponse represents the response structure from Deepl API
-type DeeplAPIResponse struct {
-	Translations []struct {
-		Text string `json:"text"`
-	} `json:"translations"`
-}
-
 // TranslateSubtitles translates the subtitles from the input file using Deepl.
-func TranslateSubtitles(inputFile, deeplKeyFile string) error {
-	subtitles, err := readSubtitles(inputFile)
+// TODO: pass in target language https://github.com/michimani/deepl-sdk-go/blob/bdd76af53e59bafa3439b9e0934539543678a1fb/types/lang.go#L105
+func TranslateSubtitles(inputFile, deeplKeyFile string, out io.Writer) error {
+	sub, err := astisub.OpenFile(inputFile)
 	if err != nil {
 		return err
 	}
 
-	deeplKey, err := ioutil.ReadFile(deeplKeyFile)
+	b, err := os.ReadFile(deeplKeyFile)
+	if err != nil {
+		return err
+	}
+	deeplKey := string(b)
+
+	// TODO: arg key file is not a must if env var is set
+	os.Setenv("DEEPL_API_AUTHN_KEY", deeplKey)
+	// TODO: add optional arg DEEPL_API_PLAN
+	os.Setenv("DEEPL_API_PLAN", "free")
+
+	client, err := deepl.NewClient()
 	if err != nil {
 		return err
 	}
 
-	translatedSubtitles, err := translateTextUsingDeepl(subtitles, string(deeplKey))
+	params := &params.TranslateTextParams{
+		TargetLang: types.TargetLangEN,
+		Text:       []string{},
+	}
+
+	for _, item := range sub.Items {
+		subtitleText := joinLines(item.Lines, "\n", "\t")
+		params.Text = append(params.Text, subtitleText)
+	}
+
+	res, errRes, err := client.TranslateText(context.Background(), params)
+
 	if err != nil {
 		return err
 	}
 
-	return writeTranslatedSubtitles("translated_"+inputFile, translatedSubtitles)
-}
-
-// readSubtitles reads the subtitle lines from the input file.
-func readSubtitles(inputFile string) ([]string, error) {
-	file, err := os.Open(inputFile)
-	if err != nil {
-		return nil, err
+	if errRes != nil {
+		return fmt.Errorf("Deepl Err: %s %s", errRes.StatusCode.Description(), errRes.Message)
 	}
-	defer file.Close()
 
-	var subtitles []string
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := scanner.Text()
-		if line != "" {
-			subtitles = append(subtitles, line)
+	for i, translated := range res.Translations {
+		lines := strings.Split(translated.Text, "\n")
+		for j, line := range lines {
+			items := strings.Split(line, "\t")
+			for k, item := range items {
+				sub.Items[i].Lines[j].Items[k].Text = item
+			}
 		}
 	}
-	return subtitles, scanner.Err()
-}
 
-// translateTextUsingDeepl calls the Deepl API to translate the text.
-func translateTextUsingDeepl(text []string, deeplKey string) ([]string, error) {
-	client := &http.Client{}
-	reqBody, err := json.Marshal(map[string]interface{}{
-		"text":        text,
-		"target_lang": "EN", // Set to your desired language code
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", "https://api-free.deepl.com/v2/translate", ioutil.NopCloser(strings.NewReader(string(reqBody))))
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "DeepL-Auth-Key "+deeplKey)
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New("failed to call Deepl API")
-	}
-
-	var deeplResp DeeplAPIResponse
-	err = json.NewDecoder(resp.Body).Decode(&deeplResp)
-	if err != nil {
-		return nil, err
-	}
-
-	var translatedTexts []string
-	for _, translation := range deeplResp.Translations {
-		translatedTexts = append(translatedTexts, translation.Text)
-	}
-
-	return translatedTexts, nil
-}
-
-// writeTranslatedSubtitles writes the translated subtitles to the output file.
-func writeTranslatedSubtitles(outputFile string, subtitles []string) error {
-	file, err := os.Create(outputFile)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	for _, line := range subtitles {
-		_, err := fmt.Fprintln(file, line)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	return sub.WriteToSRT(out)
 }
