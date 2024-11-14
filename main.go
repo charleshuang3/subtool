@@ -16,8 +16,10 @@ func main() {
 	}
 
 	var inputFile string
-	var deeplKeyFile string
 	var unwantFile string
+	var deeplKeyFile string
+	var deeplPlan string
+	var targetLanguage string
 
 	removeDescriptiveCmd := &cobra.Command{
 		Use:   "remove-descriptive-subtitle",
@@ -56,7 +58,7 @@ func main() {
 		Use:   "translate",
 		Short: "Translate subtitles using Deepl",
 		Run: func(cmd *cobra.Command, args []string) {
-			err := sub.TranslateSubtitles(inputFile, deeplKeyFile, os.Stdout)
+			err := sub.TranslateSubtitles(inputFile, targetLanguage, deeplKeyFile, deeplPlan, os.Stdout)
 			if err != nil {
 				log.Fatalln("Error translating subtitles:", err)
 			}
@@ -74,7 +76,8 @@ func main() {
 	translateCmd.Flags().StringVarP(&inputFile, "input", "i", "", "Input file path")
 	translateCmd.MarkFlagRequired("input")
 	translateCmd.Flags().StringVar(&deeplKeyFile, "deepl-key", "", "Deepl key file path")
-	translateCmd.MarkFlagRequired("deepl-key")
+	translateCmd.Flags().StringVar(&deeplPlan, "deepl-plan", "free", "Deepl api plan: free or pro, default is free")
+	translateCmd.Flags().StringVar(&targetLanguage, "target", "EN", "target language, default is EN, check https://github.com/michimani/deepl-sdk-go/blob/bdd76af5/types/lang.go#L105")
 
 	rootCmd.AddCommand(removeDescriptiveCmd, analyzeRepeatCmd, removeUnwantCmd, translateCmd)
 

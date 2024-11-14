@@ -13,24 +13,36 @@ import (
 	"github.com/michimani/deepl-sdk-go/types"
 )
 
+const (
+	deepLAuthnKeyKey = "DEEPL_API_AUTHN_KEY"
+	deepLPlanKey     = "DEEPL_API_PLAN"
+)
+
 // TranslateSubtitles translates the subtitles from the input file using Deepl.
 // TODO: pass in target language https://github.com/michimani/deepl-sdk-go/blob/bdd76af53e59bafa3439b9e0934539543678a1fb/types/lang.go#L105
-func TranslateSubtitles(inputFile, deeplKeyFile string, out io.Writer) error {
+func TranslateSubtitles(inputFile, targetLanguage, deeplKeyFile, deeplPlan string, out io.Writer) error {
 	sub, err := astisub.OpenFile(inputFile)
 	if err != nil {
 		return err
 	}
 
-	b, err := os.ReadFile(deeplKeyFile)
-	if err != nil {
-		return err
+	if os.Getenv(deepLAuthnKeyKey) == "" && deeplKeyFile == "" {
+		return fmt.Errorf("Deepl API key not found. Please set the %s environment variable or provide the key file path.", deepLAuthnKeyKey)
 	}
-	deeplKey := string(b)
 
-	// TODO: arg key file is not a must if env var is set
-	os.Setenv("DEEPL_API_AUTHN_KEY", deeplKey)
-	// TODO: add optional arg DEEPL_API_PLAN
-	os.Setenv("DEEPL_API_PLAN", "free")
+	if os.Getenv(deepLAuthnKeyKey) == "" {
+		b, err := os.ReadFile(deeplKeyFile)
+		if err != nil {
+			return err
+		}
+		deeplKey := string(b)
+
+		os.Setenv(deepLAuthnKeyKey, deeplKey)
+	}
+
+	if os.Getenv(deepLPlanKey) == "" {
+		os.Setenv(deepLPlanKey, deeplPlan)
+	}
 
 	client, err := deepl.NewClient()
 	if err != nil {
@@ -38,7 +50,7 @@ func TranslateSubtitles(inputFile, deeplKeyFile string, out io.Writer) error {
 	}
 
 	params := &params.TranslateTextParams{
-		TargetLang: types.TargetLangEN,
+		TargetLang: types.TargetLangCode(targetLanguage),
 		Text:       []string{},
 	}
 
