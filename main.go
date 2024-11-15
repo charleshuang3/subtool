@@ -75,9 +75,9 @@ func main() {
 
 	translateCmd.Flags().StringVarP(&inputFile, "input", "i", "", "Input file path")
 	translateCmd.MarkFlagRequired("input")
-	translateCmd.Flags().StringVar(&deeplKeyFile, "deepl-key", "", "Deepl key file path")
-	translateCmd.Flags().StringVar(&deeplPlan, "deepl-plan", "free", "Deepl api plan: free or pro, default is free")
-	translateCmd.Flags().StringVar(&targetLanguage, "target", "EN", "target language, default is EN, check https://github.com/michimani/deepl-sdk-go/blob/bdd76af5/types/lang.go#L105")
+	translateCmd.Flags().StringVar(&deeplKeyFile, "deepl-key", "", "Deepl key file path, or use env DEEPL_API_AUTHN_KEY")
+	translateCmd.Flags().StringVar(&deeplPlan, "deepl-plan", "free", "Deepl api plan: free or pro, or use env DEEPL_API_PLAN")
+	translateCmd.Flags().StringVar(&targetLanguage, "target", "EN", "target language, check https://github.com/michimani/deepl-sdk-go/blob/bdd76af5/types/lang.go#L105")
 
 	rootCmd.AddCommand(removeDescriptiveCmd, analyzeRepeatCmd, removeUnwantCmd, translateCmd)
 

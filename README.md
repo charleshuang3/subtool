@@ -45,5 +45,5 @@ Removes subtitles considered unwant based on a file contains unwanted sub, you c
 Translates the subtitles using the Deepl API:
 
 ```bash
-./subtool translate -i <input_file> --deepl-key <deepl_key_file>
+./subtool translate -i <input_file> [--deepl-key <deepl_key_file>]
 ```
