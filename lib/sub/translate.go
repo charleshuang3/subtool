@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 
 	"github.com/asticode/go-astisub"
 	"github.com/michimani/deepl-sdk-go"
@@ -54,10 +53,7 @@ func TranslateSubtitles(inputFile, targetLanguage, deeplKeyFile, deeplPlan strin
 		Text:       []string{},
 	}
 
-	for _, item := range sub.Items {
-		subtitleText := joinLines(item.Lines, "\n", "\t")
-		params.Text = append(params.Text, subtitleText)
-	}
+	params.Text = flattenedSubItem(sub)
 
 	res, errRes, err := client.TranslateText(context.Background(), params)
 
@@ -69,15 +65,11 @@ func TranslateSubtitles(inputFile, targetLanguage, deeplKeyFile, deeplPlan strin
 		return fmt.Errorf("Deepl Err: %s %s", errRes.StatusCode.Description(), errRes.Message)
 	}
 
-	for i, translated := range res.Translations {
-		lines := strings.Split(translated.Text, "\n")
-		for j, line := range lines {
-			items := strings.Split(line, "\t")
-			for k, item := range items {
-				sub.Items[i].Lines[j].Items[k].Text = item
-			}
-		}
+	translated := []string{}
+	for _, it := range res.Translations {
+		translated = append(translated, it.Text)
 	}
+	updateSubItem(sub, translated)
 
 	return sub.WriteToSRT(out)
 }

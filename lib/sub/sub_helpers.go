@@ -32,3 +32,28 @@ func joinLines(lines []astisub.Line, lineSpiltter, itemSpiltter string) string {
 	}
 	return sb.String()
 }
+
+// flattenedSubItem extrac all subtitle line items from subtitle.
+func flattenedSubItem(sub *astisub.Subtitles) []string {
+	var items []string
+	for _, item := range sub.Items {
+		for _, line := range item.Lines {
+			for _, lineItem := range line.Items {
+				items = append(items, lineItem.Text)
+			}
+		}
+	}
+	return items
+}
+
+func updateSubItem(sub *astisub.Subtitles, strs []string) {
+	x := 0
+	for i, item := range sub.Items {
+		for j, line := range item.Lines {
+			for k := range line.Items {
+				sub.Items[i].Lines[j].Items[k].Text = strs[x]
+				x++
+			}
+		}
+	}
+}
