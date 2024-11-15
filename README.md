@@ -4,7 +4,17 @@ Subtool is a command line utility for editing subtitle files (`.srt` only for no
 
 ## Installation
 
-Ensure that Go is installed on your system. Clone the repository and use `go build` to build the tool:
+First, ensure that Go is installed on your system.
+
+### Install binary
+
+```bash
+go install github.com/charleshuang3/subtool
+```
+
+### From Source
+
+Clone the repository and use `go build` to build the tool:
 
 ```bash
 git clone https://github.com/charleshuang3/subtool
