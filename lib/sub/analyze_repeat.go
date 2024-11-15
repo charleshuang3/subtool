@@ -3,7 +3,6 @@ package sub
 import (
 	"fmt"
 	"io"
-	"strings"
 
 	"github.com/asticode/go-astisub"
 )
@@ -38,30 +37,4 @@ func AnalyzeRepeatSubtitles(inputFile string, output io.Writer) error {
 	}
 
 	return nil
-}
-
-func joinLinesWithSpace(lines []astisub.Line) string {
-	return joinLines(lines, " ", " ")
-}
-
-func joinLines(lines []astisub.Line, lineSpiltter, itemSpiltter string) string {
-	isFirstLine := true
-	sb := strings.Builder{}
-	for _, line := range lines {
-		if isFirstLine {
-			isFirstLine = false
-		} else {
-			sb.WriteString(lineSpiltter)
-		}
-		isFirstItem := true
-		for _, item := range line.Items {
-			if isFirstItem {
-				isFirstItem = false
-			} else {
-				sb.WriteString(itemSpiltter)
-			}
-			sb.WriteString(item.Text)
-		}
-	}
-	return sb.String()
 }
