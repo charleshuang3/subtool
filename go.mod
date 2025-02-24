@@ -3,7 +3,7 @@ module github.com/charleshuang3/subtool
 go 1.23.2
 
 require (
-	github.com/asticode/go-astisub v0.32.0
+	github.com/asticode/go-astisub v0.32.1
 	github.com/michimani/deepl-sdk-go v0.3.1
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.10.0
